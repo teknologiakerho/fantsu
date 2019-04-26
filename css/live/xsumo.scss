@@ -1,0 +1,66 @@
+$xscore-overlay-bg: rgba(255, 255, 255, 0.9);
+$xscore-overlay-border-size: 1.4em;
+
+.live-xscore {
+	display: flex;
+	white-space: nowrap;
+	align-items: stretch;
+
+	width: 100%;
+}
+
+.live-xscore-p1 {
+	color: $xsumo-p1-color;
+}
+
+.live-xscore-p2 {
+	color: $xsumo-p2-color;
+}
+
+.live-xscore-team-info {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+
+	flex: 1;
+	background: $xscore-overlay-bg;
+}
+
+.live-xscore-team-info.live-xscore-p1 {
+	text-align: right;
+}
+
+.live-xscore-team-school {
+	color: $muted-color;
+	font-size: 0.8em;
+}
+
+.live-xscore-round {
+	font-size: 0.75em;
+	margin-top: -0.5em;
+	text-transform: uppercase;
+}
+
+.live-xscore-match-info {
+	text-align: center;
+	padding: 0 5%;
+	background: $xscore-overlay-bg;
+}
+
+.live-xscore-scores {
+	font-size: 1.75em;
+}
+
+.live-xscore-border-left, .live-xscore-border-right {
+	border-style: solid;
+	border-width: $xscore-overlay-border-size;
+}
+
+.live-xscore-border-left {
+	border-color: transparent $xscore-overlay-bg transparent transparent;
+}
+
+.live-xscore-border-right {
+	border-color: transparent transparent transparent $xscore-overlay-bg;
+}

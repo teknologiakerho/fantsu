@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "eventsource": "^1.0.7",
+    "obs-websocket-js": "^3.0.0",
+    "ws": "^6.2.1"
+  }
+}

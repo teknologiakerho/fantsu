@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "reconnecting-websocket": "^4.1.10",
+    "tmi.js": "^1.4.2"
+  }
+}

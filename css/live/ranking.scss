@@ -1,0 +1,45 @@
+/** Yleiset ranking määrittelyt **/
+
+.live-ranking-table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.live-ranking-row:not(:last-child) {
+	border-bottom: 1px solid $divider-color;
+}
+
+.live-ranking-rank:before {
+	content: "#";
+}
+
+.live-ranking-rank, .live-ranking-future {
+	color: $muted-color;
+}
+
+.live-ranking-team {
+	width: 60%;
+}
+
+.live-ranking-points:after {
+	content: "p";
+}
+
+.live-ranking-score, .live-ranking-score-header {
+	text-align: center;
+}
+
+.live-ranking-header {
+	text-align: left;
+	font-size: 0.6em;
+}
+
+@each $flavor, $color in $component-flavors {
+	.live-#{$flavor} .live-ranking-header {
+		color: darken($color, 10%);
+	}
+}
+
+.live-ranking-res-time {
+	color: darken($muted-color, 10%);
+}

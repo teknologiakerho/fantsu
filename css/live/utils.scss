@@ -1,0 +1,67 @@
+/** Headerit **/
+
+.live-header {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	font-size: 2em;
+	// height näköjään lasketaan font-sizen jälkeen?
+	// tän on tarkotus olla sama kun font-size
+	height: 1em;
+
+	z-index: 999;
+}
+
+@each $size in 1, 2, 4 {
+	.live-dynamic-icon-#{$size}x {
+		width: #{$size}em;
+		height: #{$size}em;
+	}
+}
+
+@keyframes live-fade-in-animation {
+	from { opacity: 0 }
+	to { opacity: 1 }
+}
+
+.live-fade-in {
+	animation: live-fade-in-animation 300ms;
+}
+
+@keyframes live-header-gradient-flow-animation {
+	from { background-position: 50% 0% }
+	to { background-position: 50% 200% }
+}
+
+@mixin radial-gradient-flow($color1, $color2: #000, $duration: 5s) {
+	background: radial-gradient($color1, $color2);
+	background-size: 200% 200%;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	animation: live-header-gradient-flow-animation $duration infinite linear reverse;
+}
+
+@each $flavor, $color in $component-flavors {
+	/* Näien pitää olla yhdessä että tää toimii
+	 * (pelkkää backgroundia ei voi ottaa omaan luokkaan) */
+	.live-#{$flavor} .live-header-title {
+		@include radial-gradient-flow($color);
+	}
+
+	.live-#{$flavor} .live-header + .live-content {
+		border-top: 2px solid darken($color, 10%);
+	}
+
+	.live-text-#{$flavor} {
+		color: $color;
+	}
+}
+
+.live-timetable-header > .live-header-title {
+	@include radial-gradient-flow($timetable-color);
+}
+
+.live-timetable-header + .live-content {
+	border-top: 2px solid darken($timetable-color, 10%);
+}

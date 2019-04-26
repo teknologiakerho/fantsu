@@ -1,0 +1,95 @@
+$event-height: 2em;
+
+.live-timetable {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.live-timetable tr:not(:last-child) {
+	border-bottom: 1px solid $divider-color;
+}
+
+.live-timetable-time {
+	color: $muted-color;
+	font-size: 2em;
+}
+
+.live-timetable-event-group {
+	display: grid;
+}
+
+.live-timetable-event-container {
+	min-height: 2 * $event-height;
+
+	grid-row: 1;
+	grid-column: 1;
+
+	transition: all 250ms;
+}
+
+.live-timetable-event-container-hide {
+	opacity: 0;
+}
+
+.live-timetable-rotation-counter {
+	font-size: 0.8em;
+	font-weight: bold;
+}
+
+.live-timetable-rotation-counter:before {
+	content: "[";
+}
+
+.live-timetable-rotation-counter:after {
+	content: "]";
+}
+
+.live-timetable-event {
+	display: flex;
+	align-items: center;
+	height: $event-height;
+
+	line-height: 1em;
+}
+
+.live-timetable-event:not(:first-child) {
+	border-top: 1px solid lighten($divider-color, 10%);
+}
+
+.live-timetable-event-badge {
+	display: flex;
+	align-items: center;
+
+	width: 15%;
+}
+
+.live-timetable-event-badge > span {
+	font-size: 0.7em;
+	font-weight: bold;
+}
+
+.live-timetable-event-main {
+	display: flex;
+	flex: 1;
+}
+
+.live-timetable-event-team-2 {
+	width: 50%;
+}
+
+.live-timetable-event-arena {
+	width: 20%;
+	margin-left: auto;
+
+	color: $muted-color;
+}
+
+.live-timetable-rotation-counter {
+	color: $timetable-color;
+}
+
+@each $flavor, $color in $component-flavors {
+	.live-timetable-#{$flavor} > .live-timetable-event-badge {
+		color: $color;
+	}
+}
