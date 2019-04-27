@@ -10,7 +10,7 @@ const {StreamController} = require("./stream.js");
 console.debug = () => 0;
 
 if(process.argv.length < 3){
-	err("main", "Usage: controller.js <config.json>");
+	err("main", "Usage: controller.js <config.js>");
 	return;
 }
 
