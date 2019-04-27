@@ -1,5 +1,5 @@
 const OBSWebSocket = require("obs-websocket-js");
-const {log, err} = require("./util.js");
+const {log, err} = require("../util/logging.js");
 
 class ObsClient {
 

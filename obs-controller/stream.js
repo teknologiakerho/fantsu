@@ -1,5 +1,5 @@
 const chalk = require("chalk");
-const {log, err} = require("./util.js");
+const {log, err} = require("../util/logging.js");
 
 export class StreamController {
 

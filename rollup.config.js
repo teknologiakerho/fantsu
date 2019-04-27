@@ -1,6 +1,7 @@
 import resolve from "rollup-plugin-node-resolve";
-import buble from "rollup-plugin-buble"
-import {terser} from "rollup-plugin-terser"
+import buble from "rollup-plugin-buble";
+import includePaths from "rollup-plugin-includepaths";
+import {terser} from "rollup-plugin-terser";
 
 export default [
 	{
@@ -27,6 +28,11 @@ export default [
 			format: "iife",
 			name: "live"
 		},
-		plugins: [ resolve(), terser() ]
+		plugins: [
+			includePaths({
+				paths: ["./util"]
+			}),
+			terser()
+		]
 	}
 ];

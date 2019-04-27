@@ -1,4 +1,4 @@
-import {listen} from "../fantsu-sse.js";
+import listen from "sse";
 import {encodeQuery, createElement} from "../util.js";
 
 class TeamInfo {

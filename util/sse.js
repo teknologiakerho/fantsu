@@ -1,4 +1,4 @@
-export function listen(url, events){
+export default function listen(url, events){
 	const ret = new EventSource(url);
 
 	if(events){

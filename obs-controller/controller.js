@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 require = require("esm")(module);
-global.WebSocket = require("ws");
+global.EventSource = require("eventsource");
 const fs = require("fs");
-const {log, err} = require("./controller/util.js");
-const obs = require("./controller/obs.js").default;
-const fantsu = require("./controller/fantsu.js").default;
-const {StreamController} = require("./controller/stream.js");
+const {log, err} = require("../util/logging.js");
+const obs = require("./obs.js").default;
+const fantsu = require("./fantsu.js").default;
+const {StreamController} = require("./stream.js");
 
 console.debug = () => 0;
 

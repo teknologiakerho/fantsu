@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const chalk = require("chalk");
-const Ws = require("reconnecting-websocket");
+const EventSource = require("eventsource");
+const fetch = require("node-fetch");
 
 function log(mes){
 	const timestamp = chalk.gray(`[${new Date().toLocaleString()}]`);
