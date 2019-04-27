@@ -17,7 +17,7 @@ if(process.argv.length < 3){
 const config = require(fs.realpathSync(process.argv[2])).default;
 
 const obsClient = obs(config.obs);
-const stream = new StreamController(obsClient, config.rules);
+const stream = new StreamController(obsClient, config.computeView);
 const fantsuClient = fantsu(stream, config.fantsu);
 
 obsClient.connect();

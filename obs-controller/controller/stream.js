@@ -3,9 +3,9 @@ const {log, err} = require("./util.js");
 
 export class StreamController {
 
-	constructor(client, rules){
+	constructor(client, computeView){
 		this.client = client;
-		this.rules = rules;
+		this.computeView = computeView;
 		this.events = {};
 	}
 
@@ -15,8 +15,8 @@ export class StreamController {
 		this.scheduleUpdate();
 	}
 
-	updateEvent(id, state){
-		this.events[id].state = state;
+	updateEvent(id, info){
+		Object.assign(this.events[id], info);
 		this.scheduleUpdate();
 	}
 
@@ -24,15 +24,6 @@ export class StreamController {
 		log("stream", `${chalk.red("---")} End event ${id}`);
 		delete this.events[id];
 		this.scheduleUpdate();
-	}
-
-	computeView(){
-		const events = Object.values(this.events);
-		for(let r of this.rules){
-			const v = r(events);
-			if(v)
-				return v;
-		}
 	}
 
 	async update(){
@@ -55,7 +46,7 @@ export class StreamController {
 	}
 
 	async _update(){
-		const view = this.computeView();
+		const view = this.computeView(Object.values(this.events));
 
 		if(view)
 			await this.client.setView(view);

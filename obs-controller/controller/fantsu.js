@@ -8,14 +8,13 @@ function on(es, name, listener){
 }
 
 export default function(stream, opt){
-	const es = new EventSource(`${opt.address}/listen/events`);
+	const es = new EventSource(`${opt.address}/filter/${opt.filter}`);
 
 	es.addEventListener("open", () => log("fantsu", `Connected to fantsu on ${opt.address}`));
 	es.addEventListener("error", () => err("fantsu", "Lost connection to fantsu"));
 
 	on(es, "judging:init", data => {
 		stream.initEvent(data.event_id, data);
-		stream.updateEvent(data.event_id, data.state);
 	});
 
 	on(es, "judging:start", data => {

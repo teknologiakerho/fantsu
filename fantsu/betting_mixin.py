@@ -1,7 +1,6 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship, reconstructor
 from fantsu.betting import BettingError
-from fantsu.db import Base
 
 class BettingUserMixin:
 
@@ -41,30 +40,3 @@ class BettingUserMixin:
 
     def give_points(self, amount, min_points=0):
         self.points = max(self.points + amount, min_points)
-
-class BettingEvent(Base):
-    __tablename__ = "betting_events"
-
-    id = sa.Column(sa.Integer, primary_key=True)
-    desc = sa.Column(sa.String, server_default="")
-
-class BettingResult(Base):
-    __tablename__ = "betting_results"
-    __table_args__ = ( sa.PrimaryKeyConstraint("user_id", "event_id"), )
-
-    user_id = sa.Column(sa.Integer,
-            sa.ForeignKey("users.id", ondelete="CASCADE"),
-            nullable=False,
-            index=True
-    )
-
-    event_id = sa.Column(sa.Integer,
-            sa.ForeignKey("betting_events.id", ondelete="CASCADE"),
-            nullable=False,
-            index=True
-    )
-
-    delta = sa.Column(sa.Integer, server_default=sa.text("0"))
-
-    user = relationship("User")
-    event = relationship("BettingEvent")

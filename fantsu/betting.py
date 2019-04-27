@@ -1,8 +1,9 @@
 import asyncio
+from time import time
 import collections
 import functools
 from aiohttp import web
-from fantsu.users import get_or_create_twitch
+import fantsu.db as model
 from fantsu.logging import logger
 from fantsu.util import lazy_signal, dispatch
 
@@ -25,6 +26,7 @@ class Countdown:
     def __init__(self, timeout):
         self._future = asyncio.ensure_future(asyncio.sleep(timeout))
         self._user_cancelled = False
+        self._finish = time() + timeout
 
     def cancel(self):
         self._user_cancelled = True
@@ -32,6 +34,13 @@ class Countdown:
 
     def done(self):
         return self._future.done()
+
+    @property
+    def time_left(self):
+        if self.done():
+            return 0
+
+        return max(self._finish - time(), 0)
 
     def __await__(self):
         try:
@@ -67,8 +76,20 @@ class BettingMatch:
         await self._countdown
 
     @property
+    def countdown(self):
+        if self._countdown is not None and not self._countdown.done():
+            return self._countdown
+
+    @property
     def countdown_active(self):
-        return self._countdown is not None and not self._countdown.done()
+        return self.countdown is not None
+
+    @property
+    def countdown_left(self):
+        if not self.countdown_active:
+            return 0
+
+        return self.countdown.time_left
 
     def place_bet(self, user, target, amount, check_countdown=True):
         if check_countdown and not self.countdown_active:
@@ -82,7 +103,6 @@ class BettingMatch:
             return
 
         self.remove_bet(user)
-
         user.allocate_points(amount)
         ret = Bet(user, target, amount)
         self.bets[user.id] = ret
@@ -101,7 +121,7 @@ class BettingMatch:
     def cancel(self):
         self.cancel_countdown()
         while self.bets:
-            self.remove_bet(next(iter(self.bets)).user)
+            self.remove_bet(next(iter(self.bets.values())).user)
 
     def finish(self, winner, basebet=0, min_points=0):
         self._calc_returns(basebet, winner)
@@ -131,6 +151,9 @@ class BettingMatch:
             bet.user.dealloc_points(bet.amount)
             bet.user.give_points(bet.ret - bet.amount, min_points=min_points)
 
+# XXX: Tää luokka hoitaa nyt bettausten käsittelyn ja käyttäjän pistejutut
+# Tää pitäs jakaa kahteen luokkaan joista toinen hoitaa bettaukset/countdownit yms
+# ja toinen pitää kirjaa niistä beteistä ja käyttäjistä (esim. init_pointtien hoito)
 class Betting:
 
     on_start = lazy_signal()
@@ -141,13 +164,22 @@ class Betting:
     on_cancel = lazy_signal()
     on_end = lazy_signal()
 
-    def __init__(self, countdown_timeout=60, basebet=100, min_points=100):
+    def __init__(self, countdown_timeout=60, basebet=100, min_points=100, init_points=None):
         self.countdown_timeout = countdown_timeout
         self.basebet = basebet
         self.min_points = min_points
+        self.init_points = init_points or min_points
         self._match = None
         self._event = None
         self._countdown_lock = asyncio.Lock()
+
+    @property
+    def match(self):
+        return self._match
+
+    @property
+    def event(self):
+        return self._event
 
     @property
     def match_active(self):
@@ -230,6 +262,9 @@ class Betting:
 
         await dispatch(self, "on_end", match=match, event=event, bets=bets)
 
+    def reset_user(self, user):
+        user.points = self.init_points
+
     def _check_match(self):
         if not self.match_active:
             raise BettingError("No match active")
@@ -268,8 +303,11 @@ class BettingWebHandler:
 
         app.add_routes([
             web.post("/betbot/place", require_betbot(self.handle_betbot_place)),
-            web.post("/betbot/restart", require_betbot(self.handle_betbot_restart))
+            web.post("/betbot/restart", require_betbot(self.handle_betbot_restart)),
+            web.get("/betting/{id}/points", self.get_points)
         ])
+
+        app["users"].on_create_user(self.create_user)
 
         flt.on_start(self.start_judging)
         flt.on_end(self.end_judging)
@@ -300,17 +338,21 @@ class BettingWebHandler:
         await self.betting.end(team1 if score1 > score2 else team2)
         self.db.commit()
 
+    async def create_user(self, user):
+        self.betting.reset_user(user)
+
     async def handle_betbot_place(self, request):
         data = await request.json()
 
         try:
-            twitch_name = data["twitch_name"]
+            id = data["id"]
+            display_name = data["display_name"]
             target = int(data["target"])
             amount = int(data["amount"])
         except:
             return web.json_response({"error": "invalid request"}, status=400)
 
-        user = get_or_create_twitch(self.db, twitch_name)
+        user = await request.app["users"].get_or_create(id, display_name)
 
         try:
             await self.betting.bet(user, target, amount)
@@ -332,3 +374,15 @@ class BettingWebHandler:
             return web.json_response({"error": str(e)}, status=420)
 
         return web.json_response({"status": "OK"})
+
+    async def get_points(self, request):
+        user = request.app["users"].get(request.match_info["id"])
+
+        if user is None:
+            return web.json_response({"error": "User not found"}, status=404)
+
+        return web.json_response({
+            "total": user.points,
+            "allocated": user.points_allocated,
+            "available": user.points_available
+        })

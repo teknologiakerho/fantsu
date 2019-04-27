@@ -7,10 +7,12 @@ import click
 import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.event import listens_for
+from sqlalchemy.schema import ColumnDefault
 import robostat.db
 import robostat.web.db
 from fantsu.flask_session import SessionDecoder
 from fantsu.db import Base
+from fantsu.users import UserManager
 from fantsu.judging import Judging, JudgingWebHandler
 from fantsu.filters import from_dict as flt_from_dict, from_list as flt_from_list, prio
 from fantsu.betting import Betting, BettingWebHandler
@@ -93,6 +95,9 @@ def setup_db(app, config):
     app["robostat-db"] = sessionmaker(bind=rs_engine)()
     app["fantsu-db"] = sessionmaker(bind=fantsu_engine)()
 
+def setup_users(app, config):
+    app["users"] = UserManager(app)
+
 def setup_judging(app, config):
     judging = Judging()
     handler = JudgingWebHandler(judging)
@@ -138,6 +143,7 @@ def setup_betting(app, config):
 def configure(app, config):
     setup_cookies(app, config)
     setup_db(app, config)
+    setup_users(app, config)
     setup_judging(app, config)
     setup_filters(app, config)
     setup_betting(app, config)
@@ -157,6 +163,8 @@ def main(**kwargs):
 
     debug = kwargs["debug"] or conf.get("DEBUG", False)\
             or os.environ.get("FLASK_ENV", "") == "debug"
+
+    app["debug"] = debug
 
     handler = ClickHandler()
     handler.setFormatter(ClickFormatter(
