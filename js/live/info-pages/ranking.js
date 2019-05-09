@@ -66,8 +66,12 @@ const renderers = {
 		`<tr class='live-ranking-row'>
 			<td class='live-ranking-rank'>${rank}</td>
 			<td class='live-ranking-team'>${team.name}</td>
-			<td class='live-ranking-score live-ranking-points'>${score.best.score}</td>
-			<td class='live-ranking-score live-ranking-res-time'>${renderTime(score.best.time)}</td>
+			<td class='live-ranking-score live-ranking-points'>
+				${score.best ? score.best.score : 0}
+			</td>
+			<td class='live-ranking-score live-ranking-res-time'>
+				${score.best ? renderTime(score.best.time) : ""}
+			</td>
 			<td class='live-ranking-score live-ranking-future'>${renderResFuture(score)}</td>
 		</tr>`,
 
