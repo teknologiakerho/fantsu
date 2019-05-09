@@ -24,17 +24,18 @@ class Carousel {
 		const page = this.pages[index];
 		const cur = this.page();
 
-		if(cur)
+		if(cur){
 			cur.interrupt()
+			await cur.teardown();
+		}
 
 		await page.prepare();
 
-		if(cur){
-			await cur.teardown();
-			cur.hide();
-		}
-
 		this.index = index;
+
+		if(cur && cur !== page)
+			cur.hide();
+
 		page.show(() => this.next());
 	}
 
