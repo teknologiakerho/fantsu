@@ -218,15 +218,17 @@ class Timetable {
 
 	async start(){
 		const events = await this._fetchEvents();
-		this.$root.innerHTML = "";
 		this.table = createTimetable(this.opt.rules, this.opt.collapse||3, events);
+		this.$root.innerHTML = "";
 		this.$root.appendChild(this.table.$root);
 		this.table.startRotation(this.opt.interval||5000);
 	}
 
 	async stop(){
-		if(this.table)
+		if(this.table){
 			this.table.stopRotation();
+			delete this.table;
+		}
 	}
 
 	async _fetchEvents(){
