@@ -152,8 +152,8 @@ def configure(app, config):
 
 @click.command()
 @click.option("-c", "--config", required=True)
-@click.option("-h", "--host", default="0.0.0.0")
-@click.option("-p", "--port", default=8080)
+@click.option("-h", "--host")
+@click.option("-p", "--port", type=int)
 @click.option("-d", "--debug", is_flag=True)
 def main(**kwargs):
     app = web.Application()
@@ -194,8 +194,8 @@ def main(**kwargs):
 
     configure(app, conf)
 
-    host = conf.get("FANTSU_HOST", kwargs["host"])
-    port = conf.get("FANTSU_PORT", kwargs["port"])
+    host = kwargs["host"] or conf.get("FANTSU_HOST", "0.0.0.0")
+    port = kwargs["port"] or conf.get("FANTSU_PORT", 8080)
 
     logger.info("Running on %s:%d" % (host, port))
 
