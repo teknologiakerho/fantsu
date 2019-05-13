@@ -159,16 +159,17 @@ class BettingRelay(SSERelay):
     async def _countdown_end(self, match, event):
         await self.relay_event("betting:countdown-end", {
             "event_id": event.id,
-            "bets": self._jsonify_bets(match)
+            "bets": self._jsonify_bets(match.bets)
         })
 
     async def _cancel(self, match, event):
         await self.relay_event("betting:cancel", {"event_id": event.id})
 
-    async def _end(self, match, event, bets):
+    async def _end(self, match, event, bets, winner):
         await self.relay_event("betting:end", {
             "event_id": event.id,
-            "bets": self._jsonify_bets(match)
+            "bets": self._jsonify_bets(bets),
+            "winner": winner
         })
 
     def _jsonify_bet(self, bet):
@@ -183,8 +184,8 @@ class BettingRelay(SSERelay):
 
         return ret
 
-    def _jsonify_bets(self, match):
-        return list(map(self._jsonify_bet, match.bets.values()))
+    def _jsonify_bets(self, bets):
+        return list(map(self._jsonify_bet, bets.values()))
 
 async def relay_sse(request, relay_class, logger_name=None, headers=None, **relay_kwargs):
     if logger_name is None:

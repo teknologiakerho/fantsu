@@ -124,13 +124,20 @@ class BettingMatch:
             self.remove_bet(next(iter(self.bets.values())).user)
 
     def finish(self, winner, basebet=0, min_points=0):
-        self._calc_returns(basebet, winner)
-        self._distribute_points(min_points)
+        if winner is None:
+            self._return_bets()
+        else:
+            self._calc_returns(basebet, winner)
+            self._distribute_points(min_points)
 
         bets = self.bets
         # Ihan vaan siltä varalta ettei joku yritä käyttää tätä vahingossa
         self.bets = None
         return bets
+
+    def _return_bets(self):
+        for bet in self.bets.values():
+            bet.ret = bet.amount
 
     def _calc_returns(self, basebet, winner):
         total_bet = sum(b.amount for b in self.bets.values()) + basebet
@@ -154,6 +161,7 @@ class BettingMatch:
 # XXX: Tää luokka hoitaa nyt bettausten käsittelyn ja käyttäjän pistejutut
 # Tää pitäs jakaa kahteen luokkaan joista toinen hoitaa bettaukset/countdownit yms
 # ja toinen pitää kirjaa niistä beteistä ja käyttäjistä (esim. init_pointtien hoito)
+# TODO: on_tie ja rahat takasin kaikille cancelin sijasta
 class Betting:
 
     on_start = lazy_signal()
@@ -260,7 +268,7 @@ class Betting:
         self._match = None
         self._event = None
 
-        await dispatch(self, "on_end", match=match, event=event, bets=bets)
+        await dispatch(self, "on_end", match=match, event=event, bets=bets, winner=winner)
 
     def reset_user(self, user):
         user.points = self.init_points
@@ -304,7 +312,7 @@ class BettingWebHandler:
         app.add_routes([
             web.post("/betbot/place", require_betbot(self.handle_betbot_place)),
             web.post("/betbot/restart", require_betbot(self.handle_betbot_restart)),
-            web.get("/betting/{id}/points", self.get_points)
+            web.get("/betting/user_points", self.get_points)
         ])
 
         app["users"].on_create_user(self.create_user)
@@ -332,10 +340,11 @@ class BettingWebHandler:
         team2 = ej.state["state"]["team2"]
 
         if score1 == score2:
-            await self.betting.cancel()
-            return
+            winner = None
+        else:
+            winner = team1 if score1 > score2 else team2
 
-        await self.betting.end(team1 if score1 > score2 else team2)
+        await self.betting.end(winner)
         self.db.commit()
 
     async def create_user(self, user):
@@ -376,10 +385,13 @@ class BettingWebHandler:
         return web.json_response({"status": "OK"})
 
     async def get_points(self, request):
-        user = request.app["users"].get(request.match_info["id"])
+        try:
+            id = request.query["id"]
+            display_name = request.query["display_name"]
+        except:
+            return web.json_response({"error": "invalid request"}, status=400)
 
-        if user is None:
-            return web.json_response({"error": "User not found"}, status=404)
+        user = await request.app["users"].get_or_create(id, display_name)
 
         return web.json_response({
             "total": user.points,
