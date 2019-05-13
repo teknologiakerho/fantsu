@@ -195,8 +195,12 @@ class Betting:
 
     async def start(self, event, timeout=None):
         if self.match_active:
-            raise BettingError("Already have active match (match id=%s eid=%s)" % (
-                self._match.id, eid))
+            #raise BettingError("Already have active match")
+            logger.error("Already have active, canceling it and force starting new match")
+            try:
+                await self.cancel()
+            except:
+                logger.exception()
 
         targets = set(event.team_ids)
         self._match = BettingMatch(targets)

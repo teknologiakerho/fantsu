@@ -17,6 +17,10 @@ class TwitchClient {
 		this.client.say(this.channel, mes);
 	}
 
+	voteCommand(i){
+		return `!bet ${i} <määrä>`;
+	}
+
 	_setup_callbacks(){
 		this.client.on("message", this._onMessage.bind(this));
 		this.client.on("connected", this._onConnected.bind(this));
@@ -30,7 +34,7 @@ class TwitchClient {
 			return;
 
 		const cmd = mes.split(/\s+/);
-		self._tryHandleCmd(channel, userstate, cmd);
+		this._tryHandleCmd(channel, userstate, cmd);
 	}
 
 	_onConnected(addr, port){

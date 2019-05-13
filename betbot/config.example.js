@@ -8,7 +8,7 @@ export default {
 
 	twitch: {
 		username: "",
-		oauth_token: ""
+		oauth_token: "",
 		channel: ""
 	}
 };

@@ -48,9 +48,15 @@ class Api {
 		query.token = this.token;
 
 		const resp = await fetch(
-			`${this.fantsuApi}${url}?${querystring.stringify(opt.query)}`, 
+			`${this.fantsuApi}${url}?${querystring.stringify(query)}`,
 			opt.fetch||{}
 		);
+
+		if(!resp.ok){
+			console.error("Betbot request failed with code", resp.status);
+			console.error(await resp.text());
+			throw resp.status;
+		}
 
 		return await resp.json();
 	}
@@ -72,13 +78,13 @@ class BetBot {
 		const event = await this.api.fetchEvent(eid);
 		match.teams = event.teams;
 
-		this.client.say(
-			`Ottelu alkaa: ${event.teams.map(t => t.name).join(" vs ")}!`
-			+` Voit veikata voittajaa seuraavat ${Math.round(countdown)} sekuntia.`
-		);
+		let mes = `Ottelu alkaa: ${event.teams.map(t => t.name).join(" vs ")}!`;
+		mes += ` Voit veikata voittajaa seuraavat ${Math.round(countdown)} sekuntia.`
 
 		for(let i in event.teams)
-			this.client.say(`Veikkaa ${event.teams[i].name}: ${this.client.voteCommand(+i+1)}`);
+			mes += ` | Veikkaa ${event.teams[i].name}: ${this.client.voteCommand(+i+1)}`;
+
+		this.client.say(mes);
 	}
 
 	endCountdown(eid, bets){
