@@ -193,11 +193,7 @@ async def relay_sse(request, relay_class, logger_name=None, headers=None, **rela
 
     logger = request_logger(logger_name)
 
-    if request.app["debug"] and (headers is None or "Access-Control-Allow-Origin" not in headers):
-        logger.debug("Debug enabled -- allowing CORS requests on sse relay")
-        if headers is None:
-            headers = {}
-        headers["Access-Control-Allow-Origin"] = "*"
+    headers.setdefault("Access-Control-Allow-Origin", "*")
 
     relay = relay_class(
             resp=sse_response(request, headers=headers),
