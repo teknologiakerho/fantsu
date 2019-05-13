@@ -193,6 +193,9 @@ async def relay_sse(request, relay_class, logger_name=None, headers=None, **rela
 
     logger = request_logger(logger_name)
 
+    if headers is None:
+        headers = {}
+
     headers.setdefault("Access-Control-Allow-Origin", "*")
 
     relay = relay_class(
