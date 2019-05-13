@@ -23,6 +23,9 @@ class Relay {
 				this.connect();
 			}
 		}
+
+		if(opt.ping !== false)
+			this.ping = opt.ping || 30*1000;
 	}
 
 	createClient(opt){
@@ -39,10 +42,18 @@ class Relay {
 	connect(){
 		this.box.setConnecting();
 		this.client.connect();
+
+		if(this.ping)
+			this._pingInterval = setInterval(() => this._pingState(), this.ping);
 	}
 
 	disconnect(){
 		this.client.disconnect();
+
+		if(this._pingInterval){
+			clearInterval(this._pingInterval)
+			delete this._pingInterval;
+		}
 	}
 
 	send(data, save=false){
@@ -75,6 +86,13 @@ class Relay {
 	_handleError(){
 		this.client.disconnect();
 		this.box.setError();
+	}
+
+	_pingState(){
+		if(this._state){
+			console.debug("[relay]", "Ping state to keep connection alive", this._state);
+			this.client.send(this._state);
+		}
 	}
 
 }
