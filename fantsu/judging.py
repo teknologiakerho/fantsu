@@ -153,7 +153,7 @@ class JudgingSession:
         return self
 
     async def __aexit__(self, *args):
-        await self.judging.end(self.ej)
+        await asyncio.shield(self.judging.end(self.ej))
 
 class JudgingWebHandler:
 
