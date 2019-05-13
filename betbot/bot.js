@@ -76,13 +76,13 @@ class BetBot {
 		const match = new Match(eid);
 		this.match = match;
 		const event = await this.api.fetchEvent(eid);
-		match.teams = event.teams;
+		match.teams = event.teams.sort((a, b) => a.name<b.name?-1:1);
 
-		let mes = `Ottelu alkaa: ${event.teams.map(t => t.name).join(" vs ")}!`;
+		let mes = `Ottelu alkaa: ${match.teams.map(t => t.name).join(" vs ")}!`;
 		mes += ` Voit veikata voittajaa seuraavat ${Math.round(countdown)} sekuntia.`
 
-		for(let i in event.teams)
-			mes += ` | Veikkaa ${event.teams[i].name}: ${this.client.voteCommand(+i+1)}`;
+		for(let i in match.teams)
+			mes += ` | Veikkaa ${match.teams[i].name}: ${this.client.voteCommand(+i+1)}`;
 
 		this.client.say(mes);
 	}

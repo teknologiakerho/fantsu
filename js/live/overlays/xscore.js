@@ -127,10 +127,14 @@ export default function($root, opt){
 
 		"judging:init": data => {
 			console.log("judging:init", data);
-			overlay.show();
-			overlay.setTeams(data.teams[0], data.teams[1]);
+			const teams = {
+				[data.teams[0].id]: data.teams[0],
+				[data.teams[1].id]: data.teams[1]
+			};
+			overlay.setTeams(teams[data.state.state.team1], teams[data.state.state.team2]);
 			overlay.setScores(data.state.score1, data.state.score2);
 			overlay.setRound(data.state.state.rounds.length);
+			overlay.show();
 		},
 
 		"judging:start": data => {
